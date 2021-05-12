@@ -4,14 +4,13 @@
 	import { Cell, CellSelectStatus, CellStatus } from './cell';
 	import { index2Col, index2Row, rowCol2Index } from './utils';
 	import color from '$lib/utils/color';
-	import WindowSize from '../utils/WindowSize.svelte';
 	import Panel from './panel/Panel.svelte';
+	import { screenWidth } from '$lib/stores/window';
 
 	export let puzzle: string =
 		'.9....85....2..91..2.1.8.....1...534..36.......7.1....3.......9...9.7..68.....7..';
 
 	const cells: Cell[] = [];
-	let screenWidth = 0;
 	let initialized = false;
 	let boardSize: number;
 	let wrapper: HTMLDivElement;
@@ -19,7 +18,7 @@
 	let two: Two;
 	let selectedIndex: number | null = null;
 
-	$: if (screenWidth > 0 && initialized) {
+	$: if ($screenWidth > 0 && initialized) {
 		two.clear();
 		wrapper.removeChild(wrapper.firstChild);
 
@@ -82,7 +81,7 @@
 		wrapperRect = wrapper.getBoundingClientRect();
 		boardSize = wrapperRect.width;
 
-		two = new Two({ width: boardSize, height: boardSize });
+		two = new Two({ width: boardSize, height: boardSize, type: Two.Types.canvas });
 		two.appendTo(wrapper);
 		two.play();
 
@@ -172,8 +171,6 @@
 		outer.linewidth = 6;
 	}
 </script>
-
-<WindowSize bind:width={screenWidth} />
 
 <div class="w-full select-none" bind:this={wrapper} on:click={handleClick} />
 <Panel class="mt-4" on:select-number={(e) => setValue(e.detail)} />

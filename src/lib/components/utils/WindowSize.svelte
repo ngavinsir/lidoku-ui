@@ -1,5 +1,5 @@
-<script lang="typescript">
-	export let width: number;
+<script>
+	export let width;
 </script>
 
 <svelte:window bind:innerWidth={width} />
