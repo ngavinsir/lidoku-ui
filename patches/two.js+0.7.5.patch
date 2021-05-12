@@ -1,0 +1,11 @@
+diff --git a/node_modules/two.js/types.d.ts b/node_modules/two.js/types.d.ts
+index 239fdbd..49a38a8 100644
+--- a/node_modules/two.js/types.d.ts
++++ b/node_modules/two.js/types.d.ts
+@@ -1,4 +1,5 @@
+-declare namespace Two {
++declare module 'two.js' {
++    export default Two;
+     /**
+      * An object that holds 3 {@link Two.Vector}s, the anchor point and its corresponding handles: `left` and `right`. In order to properly describe the bezier curve about the point there is also a command property to describe what type of drawing should occur when Two.js renders the anchors.
+      * @param [x = 0] - The x position of the root anchor point.
