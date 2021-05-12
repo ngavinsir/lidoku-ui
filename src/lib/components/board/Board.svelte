@@ -3,24 +3,32 @@
 	import Two from 'two.js';
 	import { Cell, CellSelectStatus, CellStatus } from './cell';
 	import { index2Col, index2Row, rowCol2Index } from './utils';
-	import color from '../../utils/color';
+	import color from '$lib/utils/color';
+	import WindowSize from '../utils/WindowSize.svelte';
 
-	const boardSize = 640;
+	export let puzzle: string =
+		'.9....85....2..91..2.1.8.....1...534..36.......7.1....3.......9...9.7..68.....7..';
+
 	const cells: Cell[] = [];
+	let screenWidth = 0;
+	let initialized = false;
+	let boardSize: number;
 	let wrapper: HTMLDivElement;
 	let wrapperRect: DOMRect;
 	let two: Two;
 	let selectedIndex: number | null = null;
 
+	$: if (screenWidth > 0 && initialized) {
+		two.clear();
+		wrapper.removeChild(wrapper.firstChild);
+
+		init(puzzle);
+	}
+
 	onMount(() => {
-		two = new Two({ width: boardSize, height: boardSize });
-		two.appendTo(wrapper);
-		two.play();
+		init(puzzle);
 
-		wrapperRect = wrapper.getBoundingClientRect();
-
-		initBoard();
-		initStrokes();
+		initialized = true;
 	});
 
 	function handleClick(e: MouseEvent) {
@@ -49,28 +57,64 @@
 		});
 	}
 
-	function initBoard() {
-		[...Array(81).keys()].forEach((i) => {
+	function init(puzzle: string) {
+		wrapperRect = wrapper.getBoundingClientRect();
+		boardSize = wrapperRect.width;
+
+		two = new Two({ width: boardSize, height: boardSize });
+		two.appendTo(wrapper);
+		two.play();
+
+		initBoardFromPuzzle(puzzle);
+		initStrokes();
+	}
+
+	function initBoardFromPuzzle(puzzle: string) {
+		if (puzzle.length !== 81) {
+			return;
+		}
+		const puzzleList = puzzle.split('').map((char) => {
+			if ([' ', '.', '0', '*', '_'].includes(char)) {
+				return null;
+			} else {
+				return parseInt(char);
+			}
+		});
+		puzzleList.forEach((value, i) => {
 			const col = index2Col(i);
 			const row = index2Row(i);
 			const size = boardSize / 9;
-			cells.push(
-				new Cell(
-					{
-						col,
-						index: i,
-						notes: new Set(),
-						row,
-						selectStatus: CellSelectStatus.NOT_SELECTED,
-						size,
-						status: CellStatus.GENERATED,
-						value: Math.floor(Math.random() * 9) + 1,
-						x: size / 2 + size * col,
-						y: size / 2 + size * row
-					},
-					two
-				)
-			);
+			const x = size / 2 + size * col;
+			const y = size / 2 + size * row;
+
+			if (cells.length <= i) {
+				cells.push(
+					new Cell(
+						{
+							col,
+							index: i,
+							notes: new Set(),
+							row,
+							selectStatus: CellSelectStatus.NOT_SELECTED,
+							size,
+							status: CellStatus.GENERATED,
+							value,
+							x,
+							y
+						},
+						two
+					)
+				);
+			} else {
+				cells[i].data = {
+					...cells[i].data,
+					size,
+					x,
+					y
+				};
+				cells[i].two = two;
+				cells[i].paint();
+			}
 		});
 	}
 
@@ -108,4 +152,6 @@
 	}
 </script>
 
-<div bind:this={wrapper} on:click={handleClick} />
+<WindowSize bind:width={screenWidth} />
+
+<div class="w-full select-none" bind:this={wrapper} on:click={handleClick} />

@@ -1,5 +1,5 @@
 import type Two from 'two.js';
-import color from '../../utils/color';
+import color from '$lib/utils/color';
 
 export enum CellStatus {
 	WRONG,
@@ -36,12 +36,21 @@ export class Cell {
 		this.data = data;
 		this.two = two;
 
-		this.rect = two.makeRectangle(data.x, data.y, data.size, data.size);
+		this.paint();
+	}
+
+	paint(): void {
+		this.rect = this.two.makeRectangle(this.data.x, this.data.y, this.data.size, this.data.size);
 		this.rect.fill = color.gray[800];
 		this.rect.noStroke();
 
-		this.text = two.makeText(data.value.toString(), data.x, data.y);
-		this.text.fill = color.white;
+		if (this.data.value !== null) {
+			this.text = this.two.makeText(this.data.value.toString(), this.data.x, this.data.y);
+			this.text.fill = color.white;
+			this.text.size = (1 / 3) * this.data.size;
+		}
+
+		this._updateSelectStatus();
 	}
 
 	updateSelectStatus(selectStatus: CellSelectStatus): void {
@@ -49,7 +58,11 @@ export class Cell {
 			return;
 		}
 		this.data.selectStatus = selectStatus;
-		switch (selectStatus) {
+		this._updateSelectStatus();
+	}
+
+	private _updateSelectStatus(): void {
+		switch (this.data.selectStatus) {
 			case CellSelectStatus.SELECTED:
 				this.rect.fill = color.gray[500];
 				break;
