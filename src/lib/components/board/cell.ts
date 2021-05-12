@@ -4,7 +4,8 @@ import color from '$lib/utils/color';
 export enum CellStatus {
 	WRONG,
 	CORRECT,
-	GENERATED
+	GENERATED,
+	IDLE
 }
 
 export enum CellSelectStatus {
@@ -44,13 +45,41 @@ export class Cell {
 		this.rect.fill = color.gray[800];
 		this.rect.noStroke();
 
+		this._paintText();
+		this._updateSelectStatus();
+	}
+
+	private _paintText() {
 		if (this.data.value !== null) {
 			this.text = this.two.makeText(this.data.value.toString(), this.data.x, this.data.y);
 			this.text.fill = color.white;
 			this.text.size = (1 / 3) * this.data.size;
 		}
+	}
 
-		this._updateSelectStatus();
+	removeValue(): void {
+		if (!this.text) {
+			return;
+		}
+		this.text.remove();
+		this.text = null;
+		this.data.value = null;
+	}
+
+	updateValue(value: number): void {
+		if (this.data.value === value) {
+			return;
+		}
+		this.data.value = value;
+		this._updateValue();
+	}
+
+	private _updateValue() {
+		if (this.text) {
+			this.text.value = this.data.value;
+			return;
+		}
+		this._paintText();
 	}
 
 	updateSelectStatus(selectStatus: CellSelectStatus): void {
@@ -70,7 +99,6 @@ export class Cell {
 				this.rect.fill = color.gray[700];
 				break;
 			default:
-				console.log(this.data.index);
 				this.rect.fill = color.gray[800];
 				break;
 		}

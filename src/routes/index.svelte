@@ -2,6 +2,6 @@
 	import Board from '$lib/components/board/Board.svelte';
 </script>
 
-<main class="px-1 sm:px-4 py-4 mx-auto w-full max-w-lg">
+<main class="px-1 sm:px-4 py-4 mx-auto w-full" style="max-width: 30rem">
 	<Board />
 </main>

@@ -5,6 +5,7 @@
 	import { index2Col, index2Row, rowCol2Index } from './utils';
 	import color from '$lib/utils/color';
 	import WindowSize from '../utils/WindowSize.svelte';
+	import Panel from './panel/Panel.svelte';
 
 	export let puzzle: string =
 		'.9....85....2..91..2.1.8.....1...534..36.......7.1....3.......9...9.7..68.....7..';
@@ -36,6 +37,26 @@
 		const row = Math.floor((e.clientY - wrapperRect.top) / (boardSize / 9));
 		const index = rowCol2Index(row, col);
 
+		setSelectedIndex(index);
+	}
+
+	function setValue(value: number) {
+		if (selectedIndex === null) {
+			return;
+		}
+		const cell = cells[selectedIndex];
+		if (cell.data.status === CellStatus.GENERATED) {
+			return;
+		}
+
+		if (value === cell.data.value) {
+			cell.removeValue();
+		} else {
+			cell.updateValue(value);
+		}
+
+		const index = selectedIndex;
+		selectedIndex = null;
 		setSelectedIndex(index);
 	}
 
@@ -97,7 +118,7 @@
 							row,
 							selectStatus: CellSelectStatus.NOT_SELECTED,
 							size,
-							status: CellStatus.GENERATED,
+							status: value ? CellStatus.GENERATED : CellStatus.IDLE,
 							value,
 							x,
 							y
@@ -155,3 +176,4 @@
 <WindowSize bind:width={screenWidth} />
 
 <div class="w-full select-none" bind:this={wrapper} on:click={handleClick} />
+<Panel class="mt-4" on:select-number={(e) => setValue(e.detail)} />
